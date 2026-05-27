@@ -1,0 +1,37 @@
+{
+  "students": [
+    {
+      "name": "John Doe",
+      "email": "mathew43@gmail.com",
+      "matricNumber": "DU0200"
+    },
+    {
+      "name": "Jane Smith",
+      "email": "jane.smith@gmail.com",
+      "matricNumber": "DU0455"
+    },
+    {
+      "name": "Michael Johnson",
+      "email": "michael.johnson@gmail.com",
+      "matricNumber": "DU0111"
+    }
+  ],
+  "staff": [
+    {
+      "name": "John Doe",
+      "email": "mathew@gmail.com",
+      "staffId": "DUS100",
+      "role": "Admin"
+    },
+    {
+      "name": "Sarah Brown",
+      "email": "sarah.brown@gmail.com",
+      "staffId": "DUS150"
+    },
+    {
+      "name": "Daniel Wilson",
+      "email": "daniel.wilson@gmail.com",
+      "staffId": "DUS200"
+    }
+  ]
+}

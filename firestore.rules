@@ -1,0 +1,152 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isLecturer() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'lecturer';
+    }
+
+    function isActive() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isActive == true;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated() && isActive();
+      
+      allow create: if isAuthenticated() && 
+        request.auth.uid == userId &&
+        request.resource.data.keys().hasAll(['fullName', 'email', 'role', 'department', 'isActive']) &&
+        request.resource.data.isActive == true;
+      
+      allow update: if isAuthenticated() && 
+        (isOwner(userId) || isAdmin()) &&
+        isActive();
+      
+      allow delete: if isAdmin();
+    }
+
+    // Rooms collection
+    match /rooms/{roomId} {
+      allow read: if isAuthenticated() && isActive();
+      
+      allow create: if isAuthenticated() && 
+        isActive() &&
+        (isAdmin() || isLecturer()) &&
+        request.resource.data.keys().hasAll(['name', 'description', 'category', 'createdBy', 'visibility', 'isArchived']);
+      
+      allow update: if isAuthenticated() && 
+        isActive() &&
+        (isAdmin() || 
+         (isLecturer() && resource.data.createdBy == request.auth.uid));
+      
+      allow delete: if isAuthenticated() && 
+        isActive() &&
+        (isAdmin() || 
+         (isLecturer() && resource.data.createdBy == request.auth.uid));
+    }
+
+    // Room members subcollection
+    match /rooms/{roomId}/members/{memberId} {
+      allow read: if isAuthenticated() && isActive();
+      
+      allow create: if isAuthenticated() && 
+        isActive() &&
+        (isOwner(memberId) || isAdmin());
+      
+      allow update: if isAuthenticated() && 
+        isActive() &&
+        (isOwner(memberId) || isAdmin());
+      
+      allow delete: if isAuthenticated() && 
+        isActive() &&
+        (isOwner(memberId) || isAdmin());
+    }
+
+    // Room messages subcollection
+    match /rooms/{roomId}/messages/{messageId} {
+      allow read: if isAuthenticated() && isActive();
+      
+      allow create: if isAuthenticated() && 
+        isActive() &&
+        request.resource.data.keys().hasAll(['senderId', 'senderName', 'senderRole', 'text', 'createdAt', 'updatedAt', 'edited', 'deleted']) &&
+        request.resource.data.senderId == request.auth.uid;
+      
+      allow update: if isAuthenticated() && 
+        isActive() &&
+        (resource.data.senderId == request.auth.uid || isAdmin());
+      
+      allow delete: if isAdmin();
+    }
+
+    // Private chats collection
+    match /privateChats/{chatId} {
+      allow read: if isAuthenticated() && 
+        isActive() &&
+        resource.data.participants.hasAny([request.auth.uid]);
+      
+      allow create: if isAuthenticated() && 
+        isActive() &&
+        request.resource.data.participants.hasAny([request.auth.uid]);
+      
+      allow update: if isAuthenticated() && 
+        isActive() &&
+        resource.data.participants.hasAny([request.auth.uid]);
+      
+      allow delete: if isAdmin();
+    }
+
+    // Private chat messages subcollection
+    match /privateChats/{chatId}/messages/{messageId} {
+      allow read: if isAuthenticated() && 
+        isActive() &&
+        get(/databases/$(database)/documents/privateChats/$(chatId)).data.participants.hasAny([request.auth.uid]);
+      
+      allow create: if isAuthenticated() && 
+        isActive() &&
+        get(/databases/$(database)/documents/privateChats/$(chatId)).data.participants.hasAny([request.auth.uid]) &&
+        request.resource.data.senderId == request.auth.uid;
+      
+      allow update: if isAuthenticated() && 
+        isActive() &&
+        resource.data.senderId == request.auth.uid;
+      
+      allow delete: if isAuthenticated() && 
+        isActive() &&
+        resource.data.senderId == request.auth.uid;
+    }
+
+    // Announcements collection
+    match /announcements/{announcementId} {
+      allow read: if isAuthenticated() && isActive();
+      
+      allow create: if isAuthenticated() && 
+        isActive() &&
+        isAdmin() &&
+        request.resource.data.keys().hasAll(['title', 'content', 'createdBy', 'createdByName', 'createdAt', 'updatedAt', 'pinned', 'targetAudience']);
+      
+      allow update: if isAuthenticated() && 
+        isActive() &&
+        isAdmin();
+      
+      allow delete: if isAuthenticated() && 
+        isActive() &&
+        isAdmin();
+    }
+  }
+}
