@@ -104,7 +104,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <MessageSquare className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="font-bold text-white">Campus Chat</h1>
+                <h1 className="font-bold text-white">Wave</h1>
                 <p className="text-xs text-slate-400">Engine</p>
               </div>
             </Link>

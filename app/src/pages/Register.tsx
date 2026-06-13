@@ -158,7 +158,7 @@ const Register: React.FC = () => {
               <MessageSquare className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Campus Chat</h1>
+              <h1 className="text-2xl font-bold text-white">Wave</h1>
               <p className="text-slate-400 text-sm">Engine</p>
             </div>
           </div>
@@ -314,7 +314,7 @@ const Register: React.FC = () => {
         </Card>
 
         <p className="text-center text-slate-500 text-sm mt-8">
-          Campus Chat Engine - University Communication Platform
+          Wave Engine - University Communication Platform
         </p>
       </div>
     </div>
